@@ -1,0 +1,420 @@
+import pyttsx3 
+import speech_recognition as sr
+import datetime
+import wikipedia
+import webbrowser
+import os
+import random
+import subprocess
+import requests
+import json
+import smtplib
+import pyjokes
+import pyautogui
+import instaloader
+import wolframalpha
+from selenium import webdriver
+from selenium.webdriver.common import keys
+from selenium.webdriver.chrome import options
+import time 
+
+
+try:
+    app_id=wolframalpha.Client("V42KRG-7VA36YYEYR")
+except Exception :
+    print("cheak your internet connection")
+
+engine = pyttsx3.init('sapi5')
+voices = engine.getProperty('voices')
+print(voices[1].id)
+engine.setProperty("voice", voices[0].id)
+
+def speak(audio):
+    engine.say(audio)
+    engine.runAndWait()
+
+def wishMe():
+    hour = int (datetime.datetime.now().hour)
+    tt = time.strftime("%I:%M %p")
+    if hour >=0 and hour<12 :
+        speak(f"good morning sir !{tt}")
+    elif hour >= 12 and hour <18 :
+        speak(f"good afternoon sir !{tt}")
+    elif hour >=18 and hour <20 :
+        speak(f"good evening sir !{tt}")
+    else :
+        speak(f"good night sir!{tt}")
+    speak("I am jervice and how mey i help you sir")
+def sendEmail(to,content):
+    server=smtplib.SMTP("smtp.gmail.com",587)
+    server.ehlo()
+    server.starttls()
+    server.login("anadibarman786@gmail.com","9062550959")
+    server.sendmail("anadibarman786@gmail.com",to,content)
+    server.close()
+
+
+
+def takecommand() :
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening....")
+        r.pause_threshold = 1
+        audio = r.listen(source)
+    try :
+        print("Recongnition .....")
+        query = r.recognize_google(audio, language= "en-in")
+        print(f"user said : {query} \n")
+    except Exception as e :
+        #print(e)
+        print("say that again please....")
+        return "none"
+    return query
+ 
+def TaskExecution() :
+    wishMe()
+    while 1:
+        query = takecommand().lower()
+        # search information in wikipedia
+        if "wikipedia" in query :
+            speak("searching wikipedia...")
+            query = query.replace("wikipedia", " ")
+            results = wikipedia.summary(query, sentences=2)
+            speak("According to wikipedia")
+            print(results)
+            speak(results)
+        #open website using webbrowser module 
+        
+        elif "open google" in query :
+            speak("sir ,what should i search on google")
+            cm=takecommand().lower()
+            webbrowser.open(f"{cm}")
+        elif "open stackoverflow" in query :
+            webbrowser.open("stakeoverflow.com")
+        elif "open facebook"  in query :
+            with open("account_info.txt","r") as f:
+                info =f.read().split()
+                user_name= info[2]
+                password = info[3]
+            options=webdriver.ChromeOptions()
+            options.add_argument("start-maximized")
+            options.add_argument("disable-notifications")
+            driver =webdriver.Chrome(options=options)
+            driver.get("https://facebook.com/login")
+            time.sleep(15)
+            user_name_xpath ='//*[@id="email"]'
+            password_xpath ='//*[@id="pass"]'
+            login_xpath ='//*[@id="loginbutton"]'
+            time.sleep(5)
+            driver.find_element_by_xpath(user_name_xpath).send_keys(user_name)
+            time.sleep(0.5)
+            driver.find_element_by_xpath(password_xpath).send_keys(password)
+            time.sleep(0.5)
+            driver.find_element_by_xpath(login_xpath).click()
+            speak("what we want search sir")
+            time.sleep(4)
+            opt = takecommand().lower()
+            if opt=="message":
+                noti_xpath='/html/body/div[1]/div/div[1]/div[1]/div[2]/div[4]/div[1]/div[2]/span/div/div[1]'
+                driver.find_element_by_xpath(noti_xpath).click()
+                time.sleep(5)
+            if opt=="friend request":
+                try:
+                    messi_xpath='/html/body/div[1]/div/div[1]/div[1]/div[2]/div[3]/div/div[1]/div[1]/ul/li[2]/span/div/a'
+                    driver.find_element_by_xpath(messi_xpath).click()
+                    time.sleep(5)
+                    for li in messi_xpath:
+                        print(str(li.text))
+                except:
+                    print("no message are here")  
+            if opt=="notifications":
+                link_xpath='/html/body/div[1]/div/div[1]/div[1]/div[2]/div[4]/div[1]/div[1]/span/div/div[1]'
+                driver.find_element_by_xpath(link_xpath).click()
+                time.sleep(5)
+        elif "open wikipedia" in query :           
+            webbrowser.open("wikipedia.com")
+        elif "calculate" in query:
+            speak("what should i calculate :")
+            ca=takecommand().lower()
+            res=app_id.query(ca)
+            print(next(res.results).text)
+            speak(next(res.results).text)
+        elif "open twitter" in query:
+            speak("okey sir,wait a second")
+            with open("C:\\Users\\abarm\\Desktop\\bot\\account_info.txt","r") as f:
+                info =f.read().split()
+                user_name= info[0]
+                password = info[1]
+            options=webdriver.ChromeOptions()
+            options.add_argument("start-maximized")
+            driver =webdriver.Chrome(options=options)
+            driver.get("https://twitter.com/login")
+            time.sleep(10)
+            user_name_xpath ='//*[@id="react-root"]/div/div/div[2]/main/div/div/div[1]/form/div/div[1]/label/div/div[2]/div/input'
+            password_xpath ='//*[@id="react-root"]/div/div/div[2]/main/div/div/div[1]/form/div/div[2]/label/div/div[2]/div/input'
+            login_xpath ='//*[@id="react-root"]/div/div/div[2]/main/div/div/div[1]/form/div/div[3]/div/div'
+            time.sleep(5)
+            driver.find_element_by_xpath(user_name_xpath).send_keys(user_name)
+            time.sleep(0.5)
+            driver.find_element_by_xpath(password_xpath).send_keys(password)
+            time.sleep(0.5)
+            driver.find_element_by_xpath(login_xpath).click()
+            speak("what we want search sir")
+            time.sleep(4)
+            opt = takecommand().lower()
+            if opt=="notification":
+                noti_xpath='/html/body/div/div/div/div[2]/header/div/div/div/div[1]/div[2]/nav/a[3]'
+                driver.find_element_by_xpath(noti_xpath).click()
+                time.sleep(5)
+            if opt=="messages":
+                mess_xpath='/html/body/div/div/div/div[2]/header/div/div/div/div[1]/div[2]/nav/a[4]'
+                driver.find_element_by_xpath(mess_xpath).click()
+                time.sleep(5)
+            if opt=="tweet":
+                tweet_xpath='/html/body/div/div/div/div[2]/header/div/div/div/div[1]/div[3]/a/div/svg'
+                message_xpath='/html/body/div/div/div/div[2]/main/div/div/div/div/div/div[2]/div/div[2]/div[1]/div/div/div/div[2]/div[1]/div/div/div/div/div/div/div/div/div/div[1]/div/div/div/div[2]/div/div/div/div'
+                post_xpath='/html/body/div/div/div/div[2]/main/div/div/div/div/div/div[2]/div/div[2]/div[1]/div/div/div/div[2]/div[4]/div/div/div[2]/div/div/span/span'
+                speak("what is in your mind sir")
+                Tweet =takecommand().lower()
+                time.sleep(5)
+                driver.find_element_by_xpath(message_xpath).send_keys(Tweet)
+                time.sleep(5)
+                driver.find_element_by_xpath(post_xpath).click()
+            else:
+                speak("ok")
+            
+            
+            
+        # to close any application
+        elif "close notepad" in query :
+            speak("okey sir ,closing notepad")
+            os.system("taskkill /f /im notepad.exe")
+        elif "close code" in query :
+            speak("okey sir ,closing code")
+            os.system("taskkill /f /im code.exe")
+        elif "close chrome" in query :
+            speak("okey sir ,closing chromebrowser")
+            os.system("taskkill /f /im chrome.exe")
+        elif "close music" in query or "stop music" in query or "closing music" in query or "close it" in query:
+            speak("okey sir ,closing music")
+            os.system("taskkill /f /im winamp.exe")
+        elif "close adobe reader" in query :
+            speak("okey sir ,closing adobe reader")
+            os.system("taskkill /f /im AcroRd32.exe")
+        # to set alarm
+        elif "set alam" in query :
+            ab= int(datetime.datetime.now().hour)
+            if ab== 21 :
+                music_dir= "D:\\ringtone"
+                songs=os.listdir(music_dir)
+                os.startfile(os.path.join(music_dir,songs[0]))
+
+        elif "switch windows" in query :
+            pyautogui.keyDown("alt")
+            pyautogui.press("tab")
+            time.sleep(1)
+            pyautogui.keyUp("alt")
+     # open application in pc   
+        elif "play music" in query :
+            music_dir = "D:\\songs"
+            songs = os.listdir(music_dir)
+            rd=random.choice(songs)
+            os.startfile(os.path.join(music_dir, rd))
+            speak("play....back to back")
+        elif "play by your choice" in query :
+            speak("okey sir,wait a second")
+            music_dir = "D:\\jarvise choice"
+            songs = os.listdir(music_dir)
+            rd=random.choice(songs)
+            os.startfile(os.path.join(music_dir, rd))
+        elif "play meditation" in query or "unique songs" in query:
+            speak("okey sir, wait a second")
+            music_dir = "D:\\jarvise choice\\meditation"
+            songs = os.listdir(music_dir)
+            rd=random.choice(songs)
+            os.startfile(os.path.join(music_dir, rd))
+        elif "the time" in query :
+            strTime = datetime.datetime.now().strftime("%H:%M:%S")
+            speak(f"sir, the time is {strTime}")       
+        elif "open code" in query :
+            codepath = "C:\\Users\\abarm\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe"
+            os.startfile(codepath)
+        elif "open video" in query :
+            codepath = "D:\\movies"
+            os.startfile(codepath)
+        elif "open notepad" in query :
+            codepath = "C:\\WINDOWS\\system32\\notepad.exe"
+            os.startfile(codepath)
+        elif "open adobe reader" in query :
+            codepath = "C:\\Program Files (x86)\\Adobe\\Acrobat Reader DC\\Reader\\AcroRd32.exe"
+            os.startfile(codepath)
+        elif "open chrome" in query:
+            codepath="C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+            os.startfile(codepath)
+        elif "open cmd" in query :
+            os.system("start cmd")
+        
+        elif "news" in query:  
+            try: 
+                url = "http://newsapi.org/v2/everything?q=bitcoin&from=2020-11-25&sortBy=publishedAt&apiKey=85ae4e9525bb450fbb9e5771786f708f"
+                news = requests.get(url).text
+                news_dict=json.loads(news)
+                print(news_dict["articles"])
+                arts=news_dict["articles"]                              
+                for article in arts: 
+                    speak(article['title'])
+                    speak("moving on to the next news...listen carefully")
+            except Exception as e: 
+                print(str(e))
+     # some conversation to user
+        elif "hello" in query or "hi" in query :
+            speak("hello sir")
+            speak("mey i help you wit something.")
+        elif "how are you" in query :
+            speak("i am fine , thank you sir")
+            speak("what about you sir")
+        elif "fine" in query or "nice" in query :
+            speak("that's great to hear from you")
+        elif "who made you" in query :
+            speak("I have been created by Anadi")
+        elif "play something unique..like new" in query :
+            speak("should i play Despcito songs")
+            if Despcito=="yes":  
+                music_dir = "D:\\jarvise choice\\meditation"
+                songs = os.listdir(music_dir)
+                rd=random.choice(songs)
+                os.startfile(os.path.join(music_dir, rd))
+            else:
+                speak ("okey sir")
+        elif "who i am" in query:
+            speak("If you talk then definately your human.")
+        elif "what's up" in query:
+            speak("just doing my think!.")
+        elif "why you came to world" in query:
+            speak("Thanks to Anadi. further It's a secret")
+        elif "who are you" in query:
+            speak("I am your virtual assistant created by Anadi")
+        elif "reason for you" in query:
+            speak("I was created as a Minor project by Mister Anadi ")
+        elif "wake up jarvice" in query:
+            speak("I am always online for you sir")
+        elif "thank you" in query or "thanks" in query:
+            speak("it's my pleasure sir.")
+        elif "good morning" in query :
+            speak("wishing you a very good day and a delightful morning.")
+        elif "good afternoon" in query :
+            speak("good afternoon sir, wishing you a very good day.")
+        elif "good night" in query :
+            gdMsg = ["good night sir,take rest and sweet dream in your sleep","Tomorrow you are going to have a great day.just make sure your body is prepared to take on the chalenges of tomorrow.sleep well"]
+            ans_q = random.choice(gdMsg)
+            speak(ans_q)
+        elif "exit" in query or "stop" in query or "bye" in query :
+            speak("thank you giving your time")
+            exit()
+        elif "sleep now" in query or "you can sleep" in query:
+            speak("okey sir i am going to sleep you can call me anytime.")
+            exit()
+        
+        
+        elif "search" in query or " play" in query :
+            query = query.replace("search" , " ")
+            query = query.replace("play" , " ")
+            webbrowser.open(query)
+    # pc on/off 
+        elif "restart" in query :
+            subprocess.call(["shutdown", "/r"])
+        elif "shutdown system" in query :
+            speak("hold on a sec ! Your system is on its way to shut down")
+            subprocess.call("shutdown /s") 
+        elif "hibernate" in query :           
+            speak("Hibernating") 
+            subprocess.call("shutdown / h") 
+        elif "joke" in query :
+            speak(pyjokes.get_joke())
+        elif "send to me" in query :
+            try :
+                speak("what should i say ?")
+                content=takecommand()
+                to= "abarman1729@gmail.com"
+                sendEmail(to, content)
+                speak("Email has been sent !")
+            except Exception as e :
+                print(e)
+                speak("i am not able to sent this email")
+            #send email to receiver
+        elif "send to mail " in query :
+            try :
+                speak("what should i say ?")
+                content=takecommand()
+                speak("whoom should i say")                
+                to=input("enter your reciver mail :")
+                sendEmail(to, content)
+                speak("Email has been sent !")
+            except Exception as e :
+                print(e)
+                speak("i am not able to sent this email")
+            #find my location using ip address
+        elif "where i am" in query :
+            speak("wait sir,let me cheak")
+            try :
+                ipAdd = requests.get("https://api.ipify.org").text
+                print(ipAdd)
+                url = "https://get.geojs.io/v1/ip/geo/"+ipAdd+".json"
+                geo_requests=requests.get(url)
+                geo_data = geo_requests.json()
+                city = geo_data["city"]
+                country = geo_data["country"]
+                speak(f"sir i am not sure, but i think we are in {city} of city {country} country")
+            except Exception as e:
+                speak("sorry sir,due to network issue i am not able to find where we are")
+        #to cheak instagram profile
+        elif "open instagram profile" in query :
+            speak("sir please enter the username correctly :")
+            name = input("enter user name here :")
+            webbrowser.open(f"www.instagram.com/{name}")
+            speak(f"sir here is the profile of the user {name}")
+            time.sleep(5)
+            speak("sir would you like to download profile picture of this account ")
+            condition=takecommand().lower()
+            if "yes" in condition:
+                mm=instaloader.Instaloader()
+                mm.download_profile(name,profile_pic_only=True)
+                speak("i am done sir ,profile picture saved in our main folder")
+        elif "open youtube" in query:
+            driver = webdriver.Chrome()
+            
+            driver.get("https://youtube.com")
+            time.sleep(5)
+            #searchbox=driver.find_element_by_xpath('//*[@id="search"]')
+            #searchbox.send_keys("sad songs")
+            #searchbutton=find_element_by_xpath('//*[@id="search-icon-legacy"]/yt-icon')
+            #searchbutton.click()
+            
+            
+            
+                
+        #to take a screenshot
+        elif "take a screenshot" in query :
+            speak("sir please tell me the name of the screenshot file")
+            name=takecommand().lower()
+            speak("sir please hold a few second,i am taking a screenshot")
+            time.sleep(3)
+            img = pyautogui.screenshot()
+            img.save(f"{name}.png")
+            speak("i am done sir ,profile picture saved in our main folder")
+        else:
+            try:
+                res=app_id.query(query)
+                print(next(res.results).text)
+                speak(next(res.results).text)
+            except :
+                temp = query.replace(' ','+')
+                g_url="https://www.google.com/search?q="    
+                res_g = 'sorry! i cant understand but i search from internet to give your answer ! okay'
+                print(res_g)
+                speak(res_g)
+                webbrowser.open(g_url+temp)
+                
+           
+if __name__=="__main__":
+    TaskExecution()
